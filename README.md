@@ -15,7 +15,7 @@
 ## 使用
 1. 安装Flutter。
 2. clone最新分支到本地。
-3. 在lib/glbal/string.dart中填入自己申请的App Id和App Secret。
+3. 在lib/glbal/string.dart中填入自己申请的`App Id`和`App Secret`，以及`回调地址`。
 4. 在根目录运行`flutter build apk`。
 
 ## 使用到的其他开发者的项目

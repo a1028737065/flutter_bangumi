@@ -40,5 +40,4 @@ lib/generated_plugin_registrant.dart
 # User related
 /lib/global/string1.dart
 getstatus.json
-/node_modules/
-.commitlintrc.js
+lib/global/string copy.dart

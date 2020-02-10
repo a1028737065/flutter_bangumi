@@ -1,5 +1,6 @@
 import 'package:bgm/component/favor_item.dart';
 import 'package:bgm/global/string.dart';
+import 'package:bgm/search.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'favor.dart';
@@ -66,11 +67,17 @@ class _MainPageState extends State<MainPage>
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.search),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
+                return new SearchPage();
+              }));
+            },
+            tooltip: '搜索',
           ),
           IconButton(
             key: anchorKey,
             icon: Icon(Icons.person),
+            tooltip: '登录状态管理',
             onPressed: () {
               RenderBox renderBox = anchorKey.currentContext.findRenderObject();
               var offset =
@@ -173,13 +180,14 @@ class Browser extends StatelessWidget {
                 crossPage: false,
                 duration: Duration(seconds: 5),
                 clickClose: true,
-                textStyle: TextStyle(fontSize: 15, color: Colors.white,letterSpacing: 1.2)
-                );
+                textStyle: TextStyle(
+                    fontSize: 15, color: Colors.white, letterSpacing: 1.2));
           }
         },
         navigationDelegate: (NavigationRequest request) async {
-          if (request.url.startsWith('https://book.yuan2323.xyz')) {
-            var _ok = await myDio.secondAuth(request.url.substring(32));
+          if (request.url.startsWith(GlobalVar.redirectUrl)) {
+            var _ok = await myDio.secondAuth(
+                request.url.substring(GlobalVar.redirectUrl.length + 7));
             // 返回会使FavourManage重新initState，故无需setState
             Navigator.pop(context, _ok);
             return NavigationDecision.prevent;

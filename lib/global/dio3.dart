@@ -46,7 +46,7 @@ class MyDio {
     var data = {
       'grant_type': 'authorization_code',
       'code': code,
-      'redirect_uri': 'https://book.yuan2323.xyz',
+      'redirect_uri': GlobalVar.redirectUrl,
       'client_id': GlobalVar.appId,
       'client_secret': GlobalVar.appSecret,
     };
@@ -76,7 +76,7 @@ class MyDio {
       'client_id': GlobalVar.appId,
       'client_secret': GlobalVar.appSecret,
       'refresh_token': _token,
-      'redirect_uri': 'https://book.yuan2323.xyz'
+      'redirect_uri': GlobalVar.redirectUrl
     };
     try {
       response =
