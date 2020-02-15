@@ -1,5 +1,3 @@
-import 'package:bgm/component/favor_item.dart';
-import 'package:bgm/global/string.dart';
 import 'package:bgm/search.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -62,6 +60,7 @@ class _MainPageState extends State<MainPage>
   Widget build(BuildContext context) {
     GlobalKey anchorKey = GlobalKey();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text('bangumi'),
         actions: <Widget>[

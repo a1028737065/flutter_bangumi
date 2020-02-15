@@ -1,4 +1,3 @@
-import 'package:bgm/global/string.dart';
 import 'package:bgm/global/dio3.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:extended_text/extended_text.dart';
@@ -29,7 +28,7 @@ class _ItemDetailState extends State<ItemDetail> {
     if (widget.data1 == null || widget.calendar) {
       try {
         response = await dio.get(
-          '${GlobalVar.apiUrl}/subject/${data1['id']}',
+          '/subject/${data1['id']}',
           queryParameters: {'responseGroup': 'large'},
         );
         data1 = response.data;
@@ -50,7 +49,7 @@ class _ItemDetailState extends State<ItemDetail> {
 
     if (widget.data3 == null) {
       try {
-        response = await dio.get('${GlobalVar.apiUrl}/collection/${widget.id}');
+        response = await dio.get('/collection/${widget.id}');
         data3 = response.data;
       } catch (e) {}
     } else {

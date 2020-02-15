@@ -1,7 +1,12 @@
+import 'dart:io';
+
+import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
+import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'string.dart';
+export 'string.dart';
 
 Dio dio = new Dio();
 Response response;
@@ -15,10 +20,19 @@ class MyDio {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.get('access_token');
 
+    dio.options.baseUrl = GlobalVar.apiUrl;
+    //解决频繁请求搜索API的问题
+    var cj = new CookieJar();
+    cj.saveFromResponse(Uri.parse('${GlobalVar.apiUrl}/'), [
+      new Cookie("chii_searchDateLine",
+          (DateTime.now().millisecondsSinceEpoch / 1000).round().toString()),
+    ]);
+    dio.interceptors.add(CookieManager(cj));
+    //更新token
     dio.interceptors.add(InterceptorsWrapper(onError: (error) {
       switch (error.response.statusCode) {
         case 401:
-        // TODO: 401可能是未登录
+          // TODO: 401可能是未登录
           refreshToken().then((_) => updateTokenHeaders());
           break;
         default:
@@ -61,7 +75,7 @@ class MyDio {
       updateTokenHeaders();
       print('Auth successful');
       return true;
-    }on DioError catch (e) {
+    } on DioError catch (e) {
       secondAuth(code);
       print(e);
     }

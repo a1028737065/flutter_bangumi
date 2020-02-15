@@ -3,7 +3,6 @@ import 'package:dio_http_cache/dio_http_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'component/calendar_item.dart';
-import 'global/string.dart';
 
 class CalendarPage extends StatefulWidget {
   @override
@@ -18,7 +17,7 @@ class _CalendarPageState extends State<CalendarPage>
   double width, height;
 
   Future<void> _getData() async {
-    response = await dio.get('${GlobalVar.apiUrl}/calendar',
+    response = await dio.get('/calendar',
         options: buildCacheOptions(Duration(days: 7)));
     List<dynamic> res = response.data;
     for (int _i = 0; _i < 7; _i++) {

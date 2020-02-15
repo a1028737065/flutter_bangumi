@@ -2,7 +2,6 @@ import 'dart:ui';
 
 import 'package:bgm/component/item_detail.dart';
 import 'package:bgm/global/dio3.dart';
-import 'package:bgm/global/string.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 
@@ -24,12 +23,13 @@ class _FavorItemState extends State<FavorItem>
 
   Future<void> _getData() async {
     try {
-      response = await dio.get('${GlobalVar.apiUrl}/subject/${widget.id}',queryParameters: {'responseGroup': 'large'});
+      response = await dio.get('/subject/${widget.id}',
+          queryParameters: {'responseGroup': 'large'});
       data1 = response.data;
       response = await dio.get(
           'https://cdn.jsdelivr.net/gh/czy0729/Bangumi-Subject@master/data/${(widget.id / 100).floor()}/${widget.id}.json');
       data2 = response.data;
-      response = await dio.get('${GlobalVar.apiUrl}/collection/${widget.id}');
+      response = await dio.get('/collection/${widget.id}');
       if (response.data['code'] != 400) {
         data3 = response.data;
         showMap['rating'] = data3['rating'];
@@ -70,7 +70,7 @@ class _FavorItemState extends State<FavorItem>
           timeStr += '01';
         }
         var _time = DateTime.parse(timeStr);
-        data1['air_date'] = _time.toString().substring(0,10);
+        data1['air_date'] = _time.toString().substring(0, 10);
         showMap['description1'] += ' / ${_time.year}年${_time.month}月';
         if (matches.toList()[0][0].toString().length > 8) {
           showMap['description1'] += '${_time.day}日';
@@ -86,7 +86,6 @@ class _FavorItemState extends State<FavorItem>
         }
       });
     } catch (e) {}
-    
   }
 
   @override
@@ -112,11 +111,12 @@ class _FavorItemState extends State<FavorItem>
       height: 154,
       child: isLoading
           ? FlatButton(
-              padding: EdgeInsets.only(top: 6, bottom: 6, left: 10),
+              padding: EdgeInsets.only(top: 6, bottom: 6),
               child: Row(
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.only(right: 15),
+                    margin: EdgeInsets.only(right: 25),
+                    width: 90,
                     decoration: BoxDecoration(boxShadow: [
                       BoxShadow(
                         color: Colors.black12,
@@ -124,12 +124,9 @@ class _FavorItemState extends State<FavorItem>
                         blurRadius: 5,
                       ),
                     ]),
-                    child: Container(
-                      width: 90,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: ExtendedImage.network('${showMap['src']}'),
-                      ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(3),
+                      child: ExtendedImage.network('${showMap['src']}'),
                     ),
                   ),
                   Container(

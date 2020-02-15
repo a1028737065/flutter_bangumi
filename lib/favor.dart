@@ -1,6 +1,5 @@
 import 'package:bgm/component/favor_item.dart';
 import 'package:bgm/global/dio3.dart';
-import 'package:bgm/global/string.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -61,7 +60,7 @@ class _FavourManageState extends State<FavourManage>
     String userId = prefs.get('user_id');
     try {
       response = await dio.get(
-          "${GlobalVar.apiUrl}/user/$userId/collections/$type",
+          "/user/$userId/collections/$type",
           queryParameters: {'app_id': GlobalVar.appId})
         ..data[0]['collects'].forEach((list) {
           _result[list['status']['id'] - 1] = ListView.separated(
@@ -113,6 +112,7 @@ class _FavourManageState extends State<FavourManage>
             Container(
               height: 25,
               width: 80,
+              margin: EdgeInsets.only(left: 5),
               padding: EdgeInsets.only(left: 2, right: 2),
               child: FlatButton(
                 child: Text(typeToCN[type]),
@@ -139,7 +139,7 @@ class _FavourManageState extends State<FavourManage>
               ),
             ),
             Container(
-              width: width - 80,
+              width: width - 85,
               child: TabBar(
                 labelColor: Colors.blue,
                 tabs: tabs,
