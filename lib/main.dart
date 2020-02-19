@@ -5,6 +5,7 @@ import 'favor.dart';
 import 'calendar.dart';
 import 'package:bgm/global/dio3.dart';
 import 'package:bot_toast/bot_toast.dart';
+import 'package:bgm/component/item_detail new.dart';
 
 void main() {
   runApp(MyApp());
@@ -67,8 +68,8 @@ class _MainPageState extends State<MainPage>
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              Navigator.of(context).push(new MaterialPageRoute(builder: (_) {
-                return new SearchPage();
+              Navigator.of(context).push( MaterialPageRoute(builder: (_) {
+                return  SearchPage();
               }));
             },
             tooltip: '搜索',
@@ -109,8 +110,8 @@ class _MainPageState extends State<MainPage>
                   setState(() {});
                 } else if ('logIn' == v) {
                   Navigator.of(context)
-                      .push(new MaterialPageRoute(builder: (_) {
-                    return new Browser(
+                      .push( MaterialPageRoute(builder: (_) {
+                    return  Browser(
                       url:
                           "https://bgm.tv/oauth/authorize?client_id=${GlobalVar.appId}&response_type=code",
                       title: "登录&授权",
@@ -121,8 +122,8 @@ class _MainPageState extends State<MainPage>
                   });
                 } else if ('signUp' == v) {
                   Navigator.of(context)
-                      .push(new MaterialPageRoute(builder: (_) {
-                    return new Browser(
+                      .push( MaterialPageRoute(builder: (_) {
+                    return  Browser(
                       url: "https://bgm.tv/signup",
                       title: "注册",
                       signUp: true,
@@ -137,7 +138,17 @@ class _MainPageState extends State<MainPage>
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
         controller: controller,
-        children: [FavoritePage(), CalendarPage()],
+        // children: [FavoritePage(), CalendarPage()],
+        children: [
+          FlatButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: ((context) {
+                  return ItemDetail(278234);
+                })));
+              },
+              child: Text('点我')),
+          CalendarPage()
+        ],
       ),
       bottomNavigationBar: TabBar(
         unselectedLabelColor: Colors.grey,
@@ -165,7 +176,7 @@ class Browser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return  Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),

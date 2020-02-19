@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'string.dart';
 export 'string.dart';
 
-Dio dio = new Dio();
+Dio dio = Dio();
 Response response;
 String token = '', avatar = '';
 var myDio = MyDio();
@@ -19,12 +19,13 @@ class MyDio {
   Future<void> init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.get('access_token');
+    print('get local token $token');
 
     dio.options.baseUrl = GlobalVar.apiUrl;
     //解决频繁请求搜索API的问题
-    var cj = new CookieJar();
+    var cj = CookieJar();
     cj.saveFromResponse(Uri.parse('${GlobalVar.apiUrl}/'), [
-      new Cookie("chii_searchDateLine",
+      Cookie("chii_searchDateLine",
           (DateTime.now().millisecondsSinceEpoch / 1000).round().toString()),
     ]);
     dio.interceptors.add(CookieManager(cj));
@@ -69,8 +70,10 @@ class MyDio {
           await dio.post('https://bgm.tv/oauth/access_token', data: data);
       print(response.data);
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      ['access_token', 'refresh_token', 'user_id']
-          .forEach((v) => prefs.setString(v, response.data[v].toString()));
+
+      for (var v in ['access_token', 'refresh_token', 'user_id']) {
+        prefs.setString(v, response.data[v].toString());
+      }
       token = response.data['access_token'];
       updateTokenHeaders();
       print('Auth successful');
@@ -96,8 +99,9 @@ class MyDio {
       response =
           await dio.post('https://bgm.tv/oauth/access_token', data: data);
       Map<String, dynamic> res = response.data;
-      ['access_token', 'refresh_token']
-          .forEach((v) => prefs.setString(v, res[v].toString()));
+      for (var v in ['access_token', 'refresh_token']) {
+        prefs.setString(v, res[v].toString());
+      }
       token = res['access_token'];
       updateTokenHeaders();
     } catch (e) {
@@ -121,8 +125,9 @@ class MyDio {
 
   Future<void> logOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    ['access_token', 'refresh_token', 'user_id']
-        .forEach((v) => prefs.remove(v));
+    for (var v in ['access_token', 'refresh_token', 'user_id']) {
+      prefs.remove(v);
+    }
     token = '';
     print('log out');
     print('${myDio.isLogIn}  token$token');

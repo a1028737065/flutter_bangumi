@@ -167,7 +167,7 @@ class _ItemDetailState extends State<ItemDetail> {
             ],
           ),
           onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => new Scaffold(
+              builder: (context) =>  Scaffold(
                     appBar: AppBar(
                       title: Text(_title),
                     ),
@@ -320,7 +320,7 @@ class _ItemDetailState extends State<ItemDetail> {
                       padding: EdgeInsets.only(left: 10, right: 10, top: 8),
                       child: data1['summary'] != ''
                           ? SummaryText(
-                              '${data1['summary']}',
+                              data1['summary'],
                             )
                           : Text('暂无介绍', style: TextStyle(color: Colors.grey)),
                     ),
@@ -363,7 +363,7 @@ class SimpleBarChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new charts.BarChart(
+    return  charts.BarChart(
       _createSampleData(count),
       animate: true,
     );
@@ -374,7 +374,7 @@ class SimpleBarChart extends StatelessWidget {
     count.forEach((key, value) => data.insert(0, Rating(key, value)));
 
     return [
-      new charts.Series<Rating, String>(
+       charts.Series<Rating, String>(
         id: 'Rating',
         colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
         domainFn: (Rating rating, _) => rating.score,

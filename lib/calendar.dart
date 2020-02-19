@@ -51,12 +51,12 @@ class _CalendarPageState extends State<CalendarPage>
 
   Widget _getOneDayList(int weekday) {
     var _data = data[weekday - 1];
-    return new StaggeredGridView.countBuilder(
+    return  StaggeredGridView.countBuilder(
       crossAxisCount: 24,
       itemCount: _data.length,
       itemBuilder: (BuildContext context, int index) =>
           CalendarItem(_data[index]),
-      //staggeredTileBuilder设置各个子项的大小，根据crossAxisCount和StaggeredTile.count规定的数值而定
+      //staggeredTileBuilder设置各个子项的大小，根据crossAxisCount和staggeredTile.count规定的数值而定。
       staggeredTileBuilder: (int index) => width - height <= 0
           ? StaggeredTile.count(12, 15)
           : StaggeredTile.count(6, 8),

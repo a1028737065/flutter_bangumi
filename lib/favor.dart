@@ -59,19 +59,18 @@ class _FavourManageState extends State<FavourManage>
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userId = prefs.get('user_id');
     try {
-      response = await dio.get(
-          "/user/$userId/collections/$type",
-          queryParameters: {'app_id': GlobalVar.appId})
-        ..data[0]['collects'].forEach((list) {
-          _result[list['status']['id'] - 1] = ListView.separated(
-            itemCount: list['count'],
-            itemBuilder: (context, index) =>
-                FavorItem(list['list'][index]['subject_id']),
-            separatorBuilder: (context, index) => Divider(
-              color: Colors.grey[400],
-            ),
-          );
-        });
+      response = await dio.get("/user/$userId/collections/$type",
+          queryParameters: {'app_id': GlobalVar.appId});
+      for (var list in response.data[0]['collects']) {
+        _result[list['status']['id'] - 1] = ListView.separated(
+          itemCount: list['count'],
+          itemBuilder: (context, index) =>
+              FavorItem(list['list'][index]['subject_id']),
+          separatorBuilder: (context, index) => Divider(
+            color: Colors.grey[400],
+          ),
+        );
+      }
     } catch (e) {}
     for (int i = 0; i < _result.length; i++) {
       _result[i] =
@@ -87,9 +86,11 @@ class _FavourManageState extends State<FavourManage>
   @override
   void initState() {
     super.initState();
-    ['想看', '看过', '在看', '搁置', '抛弃'].forEach((value) => tabs.add(Tab(
-          text: value,
-        )));
+    tabs = ['想看', '看过', '在看', '搁置', '抛弃']
+        .map((v) => Tab(
+              text: v,
+            ))
+        .toList();
     typeToCN.forEach((key, value) => popupMenuItems.add(PopupMenuItem(
           child: Text(value),
           value: key,

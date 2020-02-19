@@ -42,9 +42,9 @@ class _FavorItemState extends State<FavorItem>
             data3['tag'] != [] &&
             data3['tag'][0] != '') {
           showMap['description2'] += ' /';
-          data3['tag'].forEach((v) {
+          for (var v in data3['tag']) {
             showMap['description2'] += ' $v';
-          });
+          }
         }
       }
 
@@ -80,11 +80,11 @@ class _FavorItemState extends State<FavorItem>
             ' / ${data1['air_date'].toString().substring(0, 4)}年${data1['air_date'].toString().substring(5, 7)}月${data1['air_date'].toString().substring(8)}日';
       }
 
-      data2['staff'].forEach((v) {
+      for (var v in data2['staff']) {
         if ('导演' == v['desc'] || '原作' == v['desc'] || '人物设计' == v['desc']) {
           showMap['description1'] += ' / ${v['name']}';
         }
-      });
+      }
     } catch (e) {}
   }
 
