@@ -66,10 +66,19 @@ class _MainPageState extends State<MainPage>
         title: Text('bangumi'),
         actions: <Widget>[
           IconButton(
+            icon: Icon(Icons.insert_drive_file),
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                return ItemDetail(222222);
+              }));
+            },
+            tooltip: '搜索',
+          ),
+          IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
-              Navigator.of(context).push( MaterialPageRoute(builder: (_) {
-                return  SearchPage();
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                return SearchPage();
               }));
             },
             tooltip: '搜索',
@@ -109,9 +118,8 @@ class _MainPageState extends State<MainPage>
                   myDio.logOut();
                   setState(() {});
                 } else if ('logIn' == v) {
-                  Navigator.of(context)
-                      .push( MaterialPageRoute(builder: (_) {
-                    return  Browser(
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                    return Browser(
                       url:
                           "https://bgm.tv/oauth/authorize?client_id=${GlobalVar.appId}&response_type=code",
                       title: "登录&授权",
@@ -121,9 +129,8 @@ class _MainPageState extends State<MainPage>
                         () => print('${myDio.isLogIn}  token$token'));
                   });
                 } else if ('signUp' == v) {
-                  Navigator.of(context)
-                      .push( MaterialPageRoute(builder: (_) {
-                    return  Browser(
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                    return Browser(
                       url: "https://bgm.tv/signup",
                       title: "注册",
                       signUp: true,
@@ -138,17 +145,7 @@ class _MainPageState extends State<MainPage>
       body: TabBarView(
         physics: NeverScrollableScrollPhysics(),
         controller: controller,
-        // children: [FavoritePage(), CalendarPage()],
-        children: [
-          FlatButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: ((context) {
-                  return ItemDetail(278234);
-                })));
-              },
-              child: Text('点我')),
-          CalendarPage()
-        ],
+        children: [FavoritePage(), CalendarPage()],
       ),
       bottomNavigationBar: TabBar(
         unselectedLabelColor: Colors.grey,
@@ -176,7 +173,7 @@ class Browser extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(title),
       ),

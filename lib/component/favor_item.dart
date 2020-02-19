@@ -15,11 +15,13 @@ class FavorItem extends StatefulWidget {
 }
 
 class _FavorItemState extends State<FavorItem>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   double width = 1080;
   var data1, data2, data3; //1:bgm官方条目详情 2:czy0729/Bangumi-Subject条目数据 3:官方收藏状态
   Map<String, dynamic> showMap = {};
   bool isLoading = true;
+  Animation<double> animation;
+  AnimationController controller;
 
   Future<void> _getData() async {
     try {
@@ -93,9 +95,18 @@ class _FavorItemState extends State<FavorItem>
     super.initState();
     ['src', 'name', 'nameCN', 'description1', 'description2', 'rating']
         .forEach((v) => showMap.putIfAbsent(v, () => ''));
+
+    controller = AnimationController(
+        duration: Duration(milliseconds: 2500), vsync: this);
+    animation = Tween(begin: 0.22, end: 0.33).animate(controller)
+      ..addListener(() {
+        setState(() {});
+      });
+    controller.repeat(reverse: true);
+
     _getData().then((_) {
       setState(() {
-        //   isLoading = false;
+          isLoading = false;
       });
     });
   }
@@ -109,13 +120,13 @@ class _FavorItemState extends State<FavorItem>
 
     return Container(
       height: 154,
-      child: isLoading
+      child: !isLoading
           ? FlatButton(
               padding: EdgeInsets.only(top: 6, bottom: 6),
               child: Row(
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.only(right: 25),
+                    margin: EdgeInsets.only(left:15,right: 25),
                     width: 90,
                     decoration: BoxDecoration(boxShadow: [
                       BoxShadow(
@@ -131,7 +142,7 @@ class _FavorItemState extends State<FavorItem>
                   ),
                   Container(
                     padding: EdgeInsets.only(top: 3, bottom: 3),
-                    width: width - 128,
+                    width: width - 145,
                     child: Flex(
                       direction: Axis.vertical,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,10 +216,62 @@ class _FavorItemState extends State<FavorItem>
                             )));
               },
             )
-          : Center(child: CircularProgressIndicator()),
+          : FadeTransition(
+              opacity: animation,
+              child: Center(
+                heightFactor: 0.5,
+                child: Row(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.only(left: 30, right: 15),
+                      width: 90,
+                      height: 120,
+                      decoration: BoxDecoration(
+                          color: Colors.grey,
+                          borderRadius: BorderRadius.circular(8)),
+                    ),
+                    Container(
+                      width: width - 140,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Container(
+                                height: 22,
+                                width: width - 180,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(22),
+                                )),
+                            Container(
+                                height: 16,
+                                width: width - 240,
+                                margin: EdgeInsets.only(top: 10, bottom: 42),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(16),
+                                )),
+                            Container(
+                                height: 16,
+                                width: width - 200,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius: BorderRadius.circular(16),
+                                ))
+                          ]),
+                    )
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
   @override
   bool get wantKeepAlive => true;
+
+  dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 }
