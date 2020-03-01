@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bot_toast/bot_toast.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -10,7 +11,7 @@ export 'string.dart';
 
 Dio dio = Dio();
 Response response;
-String token = '', avatar = '';
+String token = '';
 var myDio = MyDio();
 
 class MyDio {
@@ -22,6 +23,7 @@ class MyDio {
     print('get local token $token');
 
     dio.options.baseUrl = GlobalVar.apiUrl;
+
     //解决频繁请求搜索API的问题
     var cj = CookieJar();
     cj.saveFromResponse(Uri.parse('${GlobalVar.apiUrl}/'), [
@@ -29,23 +31,35 @@ class MyDio {
           (DateTime.now().millisecondsSinceEpoch / 1000).round().toString()),
     ]);
     dio.interceptors.add(CookieManager(cj));
+
     //更新token
     dio.interceptors.add(InterceptorsWrapper(onError: (error) {
       switch (error.response.statusCode) {
         case 401:
-          // TODO: 401可能是未登录
-          refreshToken().then((_) => updateTokenHeaders());
+          if (error.response.statusMessage == "Unauthorized" && '' != token) {
+            token = '';
+            BotToast.showText(text: '登录信息已过期');
+          } else if (error.response.statusMessage == "Unauthorized" &&
+              '' == token) {
+            BotToast.showText(text: '尚未登录');
+          } else {
+            refreshToken().then((_) => updateTokenHeaders());
+          }
           break;
         default:
           print(error.response.data.toString());
       }
     }));
-    updateTokenHeaders();
+
+    //检查token是否过期
+    if ('' != token) {
+      checkExpire().then((_) => updateTokenHeaders());
+    }
   }
 
   Future<void> updateTokenHeaders() async {
     String mes;
-    if (MyDio().isLogIn) {
+    if (myDio.isLogIn) {
       mes = token;
       Future.delayed(Duration(days: 1), () => checkExpire());
     } else {
@@ -75,12 +89,15 @@ class MyDio {
         prefs.setString(v, response.data[v].toString());
       }
       token = response.data['access_token'];
+      prefs.setString(
+          'expire', DateTime.now().add(Duration(days: 7)).toString());
       updateTokenHeaders();
       print('Auth successful');
       return true;
-    } on DioError catch (e) {
-      secondAuth(code);
-      print(e);
+    } catch (e) {
+      if (e.response.statusCode == 500) {
+        secondAuth(code);
+      }
     }
     return false;
   }
@@ -103,8 +120,11 @@ class MyDio {
         prefs.setString(v, res[v].toString());
       }
       token = res['access_token'];
+      prefs.setString(
+          'expire', DateTime.now().add(Duration(days: 7)).toString());
       updateTokenHeaders();
     } catch (e) {
+      print(e.response.statusCode.toString());
       if (e.response.statusCode == 500) {
         refreshToken();
       }
@@ -112,20 +132,21 @@ class MyDio {
   }
 
   Future<void> checkExpire() async {
-    response = await dio.post('https://bgm.tv/oauth/token_status',
-        queryParameters: {'access_token': token});
-    Map<String, dynamic> res = response.data;
-    if (DateTime.fromMillisecondsSinceEpoch(res['expires'] * 1000)
-        .isBefore(DateTime.now().subtract(Duration(days: 1)))) {
-      refreshToken();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String _expireString = prefs.get('expire');
+    DateTime _expire = DateTime.parse(
+        null == _expireString ? '1970-01-01 00:00:01' : _expireString);
+    if (_expire.isBefore(DateTime.now())) {
+      token = '';
       print('Out of date');
+    } else if (_expire.isBefore(DateTime.now().subtract(Duration(days: 1)))) {
+      refreshToken();
     }
-    Future.delayed(Duration(days: 1), () => checkExpire());
   }
 
   Future<void> logOut() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    for (var v in ['access_token', 'refresh_token', 'user_id']) {
+    for (var v in ['access_token', 'refresh_token', 'user_id', 'expire']) {
       prefs.remove(v);
     }
     token = '';

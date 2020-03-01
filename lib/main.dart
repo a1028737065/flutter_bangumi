@@ -193,6 +193,11 @@ class Browser extends StatelessWidget {
         },
         navigationDelegate: (NavigationRequest request) async {
           if (request.url.startsWith(GlobalVar.redirectUrl)) {
+            BotToast.showText(
+              text: '需要一点时间进行授权，请稍后',
+              crossPage: false,
+              duration: Duration(seconds: 5),
+            );
             var _ok = await myDio.secondAuth(
                 request.url.substring(GlobalVar.redirectUrl.length + 7));
             // 返回会使FavourManage重新initState，故无需setState
