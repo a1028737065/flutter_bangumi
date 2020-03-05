@@ -106,7 +106,7 @@ class _FavorItemState extends State<FavorItem>
 
     _getData().then((_) {
       setState(() {
-          isLoading = false;
+        isLoading = false;
       });
     });
   }
@@ -126,7 +126,7 @@ class _FavorItemState extends State<FavorItem>
               child: Row(
                 children: <Widget>[
                   Container(
-                    margin: EdgeInsets.only(left:15,right: 25),
+                    margin: EdgeInsets.only(left: 15, right: 25),
                     width: 90,
                     decoration: BoxDecoration(boxShadow: [
                       BoxShadow(
@@ -193,9 +193,13 @@ class _FavorItemState extends State<FavorItem>
                                     Text(' / ', style: subTextStyle),
                                   ])
                                 : Text(''),
-                            Text(
-                              showMap['description2'],
-                              style: subTextStyle,
+                            Expanded(
+                              child: Text(
+                                showMap['description2'],
+                                style: subTextStyle,
+                                overflow: TextOverflow.fade,
+                                maxLines: 1,
+                              ),
                             ),
                           ],
                         ))

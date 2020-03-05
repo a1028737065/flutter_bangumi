@@ -1,10 +1,19 @@
-import 'package:bgm/global/dio3.dart';
+import 'dart:ui';
+
+import 'package:bgm/component/chilboard.dart';
+import 'package:bot_toast/bot_toast.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:color_thief_flutter/color_thief_flutter.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:extended_text/extended_text.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:charts_flutter/flutter.dart' as charts;
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import '../global/dio3.dart';
+import '../global/data.dart';
+import 'item_detail_favour.dart';
 
 class ItemDetail extends StatefulWidget {
   ItemDetail(this.id,
@@ -19,42 +28,55 @@ class ItemDetail extends StatefulWidget {
 }
 
 class _ItemDetailState extends State<ItemDetail> {
-  ScrollController controller;
+  ScrollController controller = ScrollController();
   bool hide = false, loading = true;
   Map<String, dynamic> data1 = {}, data2 = {}, data3 = {}, eps = {};
-  double height = 1980, width = 1080;
+  double height = 1980, width = 1080, appBarOpacity = 0;
+  int offsetY = 0;
+  Color coverColor1 = Colors.grey[200], coverColor2 = Colors.grey[200];
+  var anchorKey = GlobalKey();
 
   Future<void> getItemData() async {
-    if (widget.data1 == null || widget.calendar) {
-      try {
-        response = await dio.get(
-          '/subject/${data1['id']}',
-          queryParameters: {'responseGroup': 'large'},
-        );
-        data1 = response.data;
-      } catch (e) {}
-    } else {
-      data1 = widget.data1;
-    }
+    // if (widget.data1 == null || widget.calendar) {
+    //   try {
+    //     response = await dio.get('/subject/${data1['id']}?responseGroup=large');
+    //     data1 = response.data;
+    //   } catch (e) {}
+    // } else {
+    //   data1 = widget.data1;
+    // }
 
-    if (widget.data2 == null) {
-      try {
-        response = await dio.get(
-            'https://cdn.jsdelivr.net/gh/czy0729/Bangumi-Subject@master/data/${(widget.id / 100).floor()}/${widget.id}.json');
-        data2 = response.data;
-      } catch (e) {}
-    } else {
-      data2 = widget.data2;
-    }
+    // if (widget.data2 == null) {
+    //   try {
+    //     response = await dio.get(
+    //         'https://cdn.jsdelivr.net/gh/czy0729/Bangumi-Subject@master/data/${(widget.id / 100).floor()}/${widget.id}.json');
+    //     data2 = response.data;
+    //   } catch (e) {}
+    // } else {
+    //   data2 = widget.data2;
+    // }
 
-    if (widget.data3 == null) {
-      try {
-        response = await dio.get('/collection/${widget.id}');
-        data3 = response.data;
-      } catch (e) {}
-    } else {
-      data3 = widget.data3;
-    }
+    // if (widget.data3 == null) {
+    //   try {
+    //     response = await dio.get('/collection/${widget.id}');
+    //     data3 = response.data;
+    //   } catch (e) {}
+    // } else {
+    //   data3 = widget.data3;
+    // }
+    data1 = Data().data[0];
+    data2 = Data().data[1];
+    data3 = Data().data[2];
+
+    getImageFromProvider(ExtendedNetworkImageProvider(data1['images']['large']))
+        .then((image) {
+      getColorFromImage(image).then((color) {
+        setState(() {
+          coverColor1 = Color.fromRGBO(color[0], color[1], color[2], 1);
+          coverColor2 = Color.fromRGBO(color[0], color[1], color[2], 0.1);
+        });
+      });
+    });
 
     _checkNullData();
     setState(() {});
@@ -66,37 +88,9 @@ class _ItemDetailState extends State<ItemDetail> {
         data1[key] = [];
       }
     });
-    ['crt', 'staff', 'eps'].forEach((key) => data1.putIfAbsent(key, () => []));
-  }
-
-  String weekday(int i) {
-    return ['一', '二', '三', '四', '五', '六', '日'][i - 1];
-  }
-
-  Widget introText(String text) {
-    return Text(text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(color: Colors.grey[600], height: 2, fontSize: 15));
-  }
-
-  List<Widget> collectionChips() {
-    Map<String, String> stateTrans = {
-      'wish': '想看',
-      'collect': '看过',
-      'doing': '在看',
-      'on_hold': '搁置',
-      'dropped': '抛弃'
-    };
-    List<Padding> _temp = [];
-    stateTrans.forEach(
-      (key, value) => _temp.add(
-        Padding(
-            padding: EdgeInsets.only(left: 10),
-            child: Chip(label: Text('$value ${data1['collection'][key]}'))),
-      ),
-    );
-    return _temp;
+    for (var key in ['crt', 'staff', 'eps']) {
+      data1.putIfAbsent(key, () => []);
+    }
   }
 
   List<Widget> crtList() {
@@ -109,94 +103,116 @@ class _ItemDetailState extends State<ItemDetail> {
     if (_crtList.isEmpty) {
       return [Text('暂无角色信息', style: TextStyle(fontSize: 15))];
     }
-    _crtList.forEach((item) => _temp.add(FlatButton(
-          child: Flex(
-            direction: Axis.vertical,
-            children: <Widget>[
-              Expanded(
-                child: ExtendedImage.network(
-                  item['images']['medium'],
-                  cache: true,
-                  loadStateChanged: (ExtendedImageState state) {
-                    switch (state.extendedImageLoadState) {
-                      case LoadState.loading:
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                        break;
-                      case LoadState.completed:
-                        return null;
-                        break;
-                      case LoadState.failed:
-                        state.reLoadImage();
-                        return Center(
-                          child: CircularProgressIndicator(),
-                        );
-                        break;
-                    }
-                    return null;
-                  },
+
+    for (var item in _crtList) {
+      _temp.add(GestureDetector(
+        child: Container(
+            width: 250,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: ExtendedImage.network(
+                    item['images']['grid'],
+                    cache: true,
+                    loadStateChanged: (ExtendedImageState state) {
+                      switch (state.extendedImageLoadState) {
+                        case LoadState.loading:
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                          break;
+                        case LoadState.completed:
+                          return null;
+                          break;
+                        case LoadState.failed:
+                          state.reLoadImage();
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                          break;
+                      }
+                      return null;
+                    },
+                  ),
                 ),
-                flex: 1,
-              ),
-              Text(
-                '${item['name_cn'] == '' ? item['name'] : item['name_cn']}',
-                style: TextStyle(
-                    color: Color.fromRGBO(0, 132, 180, 1), fontSize: 14.8),
-              ),
-              RichText(
-                  text: TextSpan(
-                children: [
-                  TextSpan(
-                      text: '${item['role_name']} ',
-                      style: TextStyle(color: Colors.grey)),
-                  TextSpan(
-                      text: item['name'],
-                      style: TextStyle(color: Color.fromRGBO(102, 102, 102, 1)))
-                ],
-              )),
-              RichText(
-                  text: TextSpan(
-                children: [
-                  TextSpan(text: 'CV: ', style: TextStyle(color: Colors.grey)),
-                  TextSpan(
-                      text: item['actors'][0]['name'],
-                      style: TextStyle(color: Color.fromRGBO(102, 102, 102, 1)))
-                ],
-              )),
-            ],
-          ),
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) =>  Scaffold(
-                    appBar: AppBar(
-                      title: Text(_title),
-                    ),
-                    body: WebView(
-                      initialUrl: item['url'],
-                      javascriptMode: JavascriptMode.unrestricted,
-                      onWebViewCreated: (controller) {
-                        _controller = controller;
-                      },
-                      onPageFinished: (url) {
-                        _controller
-                            .evaluateJavascript("document.title")
-                            .then((result) {
-                          setState(() {
-                            _title = 'result';
-                          });
+                Container(
+                    margin: EdgeInsets.only(top: 12),
+                    width: 150,
+                    child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(item['name'],
+                              style: TextStyle(
+                                  color: Color.fromRGBO(0, 132, 180, 1),
+                                  fontSize: 14.8)),
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                    text: '${item['role_name']} ',
+                                    style: TextStyle(color: Colors.grey)),
+                                TextSpan(
+                                    text: item['name_cn'] == ''
+                                        ? item['name']
+                                        : item['name_cn'],
+                                    style: TextStyle(
+                                        color:
+                                            Color.fromRGBO(102, 102, 102, 1)))
+                              ],
+                            ),
+                          ),
+                          RichText(
+                              text: TextSpan(
+                            children: [
+                              TextSpan(
+                                  text: 'CV: ',
+                                  style: TextStyle(color: Colors.grey)),
+                              TextSpan(
+                                  text: item['actors'][0]['name'],
+                                  style: TextStyle(
+                                      color: Color.fromRGBO(102, 102, 102, 1)))
+                            ],
+                          ))
+                        ])),
+              ],
+            )),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (contFext) => Scaffold(
+                  appBar: AppBar(
+                    title: Text(_title),
+                  ),
+                  body: WebView(
+                    initialUrl: item['url'],
+                    javascriptMode: JavascriptMode.unrestricted,
+                    onWebViewCreated: (controller) {
+                      _controller = controller;
+                    },
+                    onPageFinished: (url) {
+                      _controller
+                          .evaluateJavascript("document.title")
+                          .then((result) {
+                        setState(() {
+                          _title = 'result';
                         });
-                      },
-                    ),
-                  ))),
-        )));
+                      });
+                    },
+                  ),
+                ))),
+      ));
+    }
+
     return _temp;
   }
 
   @override
   void initState() {
     super.initState();
-    data1 = widget.data1;
+    data1 = Data().data[0];
     _checkNullData();
+
     getItemData().then((v) {
       loading = false;
       if (!widget.calendar) {
@@ -205,239 +221,216 @@ class _ItemDetailState extends State<ItemDetail> {
     });
   }
 
+  _onScroll(offset) {
+    double opacity = offset / 200;
+    if (opacity < 0) {
+      opacity = 0;
+    } else if (opacity > 1) {
+      opacity = 1;
+    }
+    setState(() {
+      appBarOpacity = opacity;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
-    height = MediaQuery.of(context).size.height;
+    var _paddingTop = MediaQueryData.fromWindow(window).padding.top;
 
     return Scaffold(
-      appBar: AppBar(
-        title: loading
-            ? Text('加载中')
-            : Text(
-                '${data1['name_cn'] == '' ? data1['name'] : data1['name_cn']}'),
-      ),
-      body: ListView(
-        children: <Widget>[
-          Container(
-            decoration: BoxDecoration(color: Color.fromRGBO(70, 130, 180, 0.4)),
-            height: 175,
-            padding: EdgeInsets.only(top: 12, bottom: 12, left: 8, right: 15),
-            child: Row(
-              children: <Widget>[
-                Container(
-                  decoration: BoxDecoration(boxShadow: [
-                    BoxShadow(
-                        color: Colors.grey,
-                        offset: Offset.fromDirection(0.9, 3))
-                  ]),
-                  margin: EdgeInsets.only(right: 16),
-                  height: 150,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image(
-                        image: ExtendedNetworkImageProvider(
-                      "${data1['images']['large']}",
-                    )),
+        body: Stack(
+      children: <Widget>[
+        MediaQuery.removePadding(
+            removeTop: true,
+            context: context,
+            child: NotificationListener(
+              onNotification: (scrollNotification) {
+                if (scrollNotification is ScrollUpdateNotification &&
+                    scrollNotification.depth == 0) {
+                  _onScroll(scrollNotification.metrics.pixels);
+                }
+                return;
+              },
+              child: SingleChildScrollView(
+                child: Stack(children: [
+                  //顶部
+                  Positioned(
+                    child: Container(
+                      height: 160,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [coverColor1, coverColor2, coverColor1]),
+                      ),
+                    ),
                   ),
-                ),
-                Container(
-                  width: width - 216,
-                  // TODO: 只用一个Text()输出，当数据不存在时就不用显示空行
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      introText('${data1['name']}'),
-                      introText(
-                          '${data1['air_date'].toString().substring(0, 4)}年${data1['air_date'].toString().substring(5, 7)}月${data1['air_date'].toString().substring(8)}日'),
-                      data1['air_weekday'] != null
-                          ? introText('每周${weekday(data1['air_weekday'])}放送')
-                          : Text(''),
-                      data1['eps_count'] != null || data1['eps'] != null
-                          ? introText(
-                              '共${data1['eps_count'] != null ? data1['eps_count'] : data1['eps'].length}话')
-                          : Text(''),
-                    ],
+                  Container(
+                    margin: EdgeInsets.only(top: 120),
+                    height: 40,
+                    decoration: BoxDecoration(
+                        color: ThemeData().scaffoldBackgroundColor,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(35),
+                            topRight: Radius.circular(35))),
                   ),
-                ),
-                !loading
-                    ? GestureDetector(
-                        child: Container(
-                          width: 60,
-                          child: Column(
-                            children: <Widget>[
-                              data1['rating'] != null
-                                  ? Text(
-                                      '\n${data1['rating']['score'].toStringAsFixed(1)}',
-                                      style: TextStyle(
-                                          fontSize: 36,
-                                          color: Colors.orange[600],
-                                          height: 1))
-                                  : Text('\n暂无\n评分',
-                                      style: TextStyle(
-                                          color: Colors.orange[600],
-                                          fontSize: 22,
-                                          height: 1.5)),
-                              Text(
-                                  data1['rating'] != null
-                                      ? 'x${data1['rating']['total']}人'
-                                      : '',
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                      height: 1.55))
-                            ],
+
+                  // 主要内容
+                  Column(children: [
+                    Container(
+                      height: _paddingTop + 230,
+                      padding: EdgeInsets.only(top: _paddingTop + 40, left: 15),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 27),
+                            child: ExtendedImage.network(
+                              data1['images']['large'],
+                              width: 115,
+                              height: 150,
+                              fit: BoxFit.cover,
+                              shape: BoxShape.rectangle,
+                              border: Border.all(color: Colors.white, width: 1),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(4)),
+                              cache: true,
+                            ),
                           ),
-                        ),
-                        onTap: data1['rating'] != null
-                            ? () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                          title: Text('评分'),
-                                          content: Container(
-                                            height: height - 400,
-                                            child: SimpleBarChart(
-                                                data1['rating']['count']),
-                                          ));
-                                    });
-                              }
-                            : null,
-                      )
-                    : Text('')
+                          Container(
+                            width: width - 155,
+                            margin: EdgeInsets.only(top: 63, left: 10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  data1['name'],
+                                  style: TextStyle(
+                                      color: Colors.grey, fontSize: 11.5),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Expanded(
+                                    child: Padding(
+                                  padding: EdgeInsets.only(top: 3),
+                                  child: Text(
+                                    null != data1['name_cn']
+                                        ? data1['name_cn']
+                                        : data1['name'],
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 16),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                )),
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 15),
+                                  child: Row(children: [
+                                    Text('${data1['rating']['score']}',
+                                        style: TextStyle(
+                                            color: Colors.pink[300],
+                                            fontSize: 18)),
+                                    Container(
+                                      margin: EdgeInsets.only(left: 5),
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 3),
+                                      decoration: BoxDecoration(
+                                          color: Colors.pink[300],
+                                          borderRadius:
+                                              BorderRadius.circular(4)),
+                                      child: Text(
+                                          GlobalVar().getRating(
+                                              data1['rating']['score']),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14,
+                                          )),
+                                    ),
+                                  ]),
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                    Divider(),
+                    FavourWidget(data1['id'], data1['collection']),
+                    Divider(),
+                    Container(
+                      height: 1600,
+                    ),
+                  ])
+                ]),
+              ),
+            )),
+
+        // 两个虚拟按键
+        SafeArea(
+            child: Container(
+                margin: EdgeInsets.only(left: 3, top: 4), // 不确定在各种分辨率上是否表现一致。
+                child: IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    color: Colors.white,
+                    onPressed: () {}))),
+        SafeArea(
+            child: Container(
+                alignment: Alignment.topRight,
+                margin: EdgeInsets.only(top: 4),
+                child: IconButton(
+                    icon: Icon(Icons.more_horiz),
+                    color: Colors.white,
+                    onPressed: () {}))),
+        // 随滑动渐显的appBar
+        Opacity(
+          opacity: appBarOpacity,
+          child: Container(
+            height: _paddingTop + 56, // 56为MD appBar的高度
+            child: AppBar(
+              title: Text(
+                  '${data1['name_cn'] == '' ? data1['name'] : data1['name_cn']}'),
+              actions: <Widget>[
+                IconButton(
+                    key: anchorKey,
+                    icon: Icon(Icons.more_horiz),
+                    onPressed: () {
+                      RenderBox renderBox =
+                          anchorKey.currentContext.findRenderObject();
+                      var offset = renderBox
+                          .localToGlobal(Offset(0.0, renderBox.size.height));
+
+                      showMenu(
+                          context: context,
+                          position: RelativeRect.fromLTRB(
+                              offset.dx, offset.dy - 10, 0, 0),
+                          items: [
+                            PopupMenuItem(
+                              child: Text('复制链接'),
+                              value: 'copy',
+                            )
+                          ]).then((value) {
+                        if (value == 'copy') {
+                          Clipboard.setData(ClipboardData(text: data1['url']))
+                              .then((_) {
+                            BotToast.showText(text: '已复制');
+                          });
+                        }
+                      });
+                    })
               ],
             ),
           ),
-          loading
-              ? Container(
-                  height: height - 300,
-                  child: Center(child: CircularProgressIndicator()),
-                )
-              : Column(
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(left: 10, right: 10, top: 8),
-                      child: data1['summary'] != ''
-                          ? SummaryText(
-                              data1['summary'],
-                            )
-                          : Text('暂无介绍', style: TextStyle(color: Colors.grey)),
-                    ),
-                    Divider(),
-                    Container(
-                      height: 40,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: collectionChips(),
-                      ),
-                    ),
-                    Divider(),
-                    Container(
-                      height: 220,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: crtList(),
-                      ),
-                    ),
-                    Divider(),
-                  ],
-                ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ));
   }
 }
-
-class Rating {
-  final score;
-  final int count;
-
-  Rating(this.score, this.count);
-}
-
-class SimpleBarChart extends StatelessWidget {
-  final Map count;
-
-  SimpleBarChart(this.count);
-
-  @override
-  Widget build(BuildContext context) {
-    return  charts.BarChart(
-      _createSampleData(count),
-      animate: true,
-    );
-  }
-
-  static List<charts.Series<Rating, String>> _createSampleData(Map count) {
-    List<Rating> data = [];
-    count.forEach((key, value) => data.insert(0, Rating(key, value)));
-
-    return [
-       charts.Series<Rating, String>(
-        id: 'Rating',
-        colorFn: (_, __) => charts.MaterialPalette.blue.shadeDefault,
-        domainFn: (Rating rating, _) => rating.score,
-        measureFn: (Rating rating, _) => rating.count,
-        data: data,
-      )
-    ];
-  }
-}
-
-class SummaryText extends StatefulWidget {
-  SummaryText(this.text, {Key key}) : super(key: key);
-  final String text;
-
-  @override
-  _SummaryTextState createState() => _SummaryTextState();
-}
-
-class _SummaryTextState extends State<SummaryText> {
-  bool _isExpansion = false;
-  int _maxLine = 4;
-  TapGestureRecognizer recognizer;
-
-  Widget _richText(String text) {
-    //TODO: 直接利用ExtendText实现
-    return _isExpansion
-        ? RichText(
-            text: TextSpan(children: [
-              TextSpan(text: text, style: TextStyle(color: Colors.black)),
-              TextSpan(
-                  text: '收起',
-                  style: TextStyle(color: Colors.blue),
-                  recognizer: recognizer)
-            ]),
-          )
-        : ExtendedText(
-            text,
-            maxLines: _maxLine,
-            overFlowTextSpan: OverFlowTextSpan(children: <TextSpan>[
-              TextSpan(text: ' \u2026 '),
-              TextSpan(
-                  text: "展开",
-                  style: TextStyle(
-                    color: Colors.blue,
-                  ),
-                  recognizer: recognizer)
-            ]),
-          );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    recognizer = TapGestureRecognizer()
-      ..onTap = () {
-        setState(() {
-          _isExpansion = !_isExpansion;
-        });
-      };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _richText(widget.text);
-  }
-}
+// Container(
+//     constraints: BoxConstraints(minHeight: 60, maxHeight: 200),
+//     child: SingleChildScrollView(
+//         scrollDirection: Axis.horizontal,
+//         child: Row(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: crtList(),
+//         )))

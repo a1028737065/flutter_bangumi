@@ -113,6 +113,7 @@ class MyDio {
       'redirect_uri': GlobalVar.redirectUrl
     };
     try {
+      dio.lock();
       response =
           await dio.post('https://bgm.tv/oauth/access_token', data: data);
       Map<String, dynamic> res = response.data;
@@ -123,6 +124,7 @@ class MyDio {
       prefs.setString(
           'expire', DateTime.now().add(Duration(days: 7)).toString());
       updateTokenHeaders();
+      dio.unlock();
     } catch (e) {
       print(e.response.statusCode.toString());
       if (e.response.statusCode == 500) {
