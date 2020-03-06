@@ -30,11 +30,13 @@ class ItemDetail extends StatefulWidget {
 class _ItemDetailState extends State<ItemDetail> {
   ScrollController controller = ScrollController();
   bool hide = false, loading = true;
-  Map<String, dynamic> data1 = {}, data2 = {}, data3 = {}, eps = {};
+  Map<String, dynamic> data1 = {}, data2 = {}, data3, eps = {};
   double height = 1980, width = 1080, appBarOpacity = 0;
   int offsetY = 0;
   Color coverColor1 = Colors.grey[200], coverColor2 = Colors.grey[200];
   var anchorKey = GlobalKey();
+
+  bool get favourLoading => null == data3;
 
   Future<void> getItemData() async {
     // if (widget.data1 == null || widget.calendar) {
@@ -59,14 +61,24 @@ class _ItemDetailState extends State<ItemDetail> {
     // if (widget.data3 == null) {
     //   try {
     //     response = await dio.get('/collection/${widget.id}');
-    //     data3 = response.data;
+    //     //未收藏时仍会正常响应
+    //     if (response.data['error'] == null) {
+    //       data3 = response.data;
+    //       favourLoading = false;
+    //     } else {
+    //       data3 = {};
+    //       favourLoading = false;
+    //     }
     //   } catch (e) {}
     // } else {
     //   data3 = widget.data3;
+    //   favourLoading = false;
     // }
+
+    // TODO: 测试数据，发布时请删除
     data1 = Data().data[0];
     data2 = Data().data[1];
-    data3 = Data().data[2];
+    data3 = Data().collectionStatus;
 
     getImageFromProvider(ExtendedNetworkImageProvider(data1['images']['large']))
         .then((image) {
@@ -96,7 +108,6 @@ class _ItemDetailState extends State<ItemDetail> {
   List<Widget> crtList() {
     WebViewController _controller;
     String _title = "详情";
-
     List<Widget> _temp = [];
     List _crtList = data1['crt'] == null ? [] : data1['crt'];
 
@@ -203,7 +214,6 @@ class _ItemDetailState extends State<ItemDetail> {
                 ))),
       ));
     }
-
     return _temp;
   }
 
@@ -341,7 +351,7 @@ class _ItemDetailState extends State<ItemDetail> {
                                               BorderRadius.circular(4)),
                                       child: Text(
                                           GlobalVar().getRating(
-                                              data1['rating']['score']),
+                                              data1['rating']['score'].ceil()),
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 14,
@@ -356,7 +366,17 @@ class _ItemDetailState extends State<ItemDetail> {
                       ),
                     ),
                     Divider(),
-                    FavourWidget(data1['id'], data1['collection']),
+                    FavourWidget(
+                      {
+                        'id': data1['id'],
+                        'name': data1['name'],
+                        'name_cn': data1['name_cn'],
+                        'collection': data1['collection'],
+                        'tags': data2['tags']
+                      },
+                      data3,
+                      favourLoading,
+                    ),
                     Divider(),
                     Container(
                       height: 1600,
@@ -366,7 +386,7 @@ class _ItemDetailState extends State<ItemDetail> {
               ),
             )),
 
-        // 两个虚拟按键
+        // 两个模拟按键
         SafeArea(
             child: Container(
                 margin: EdgeInsets.only(left: 3, top: 4), // 不确定在各种分辨率上是否表现一致。

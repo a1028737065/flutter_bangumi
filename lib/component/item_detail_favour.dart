@@ -1,22 +1,23 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import '../global/dio3.dart';
 import '../main.dart';
-import '../global/data.dart';
 
 class FavourWidget extends StatefulWidget {
-  FavourWidget(this.id, this.collection, {Key key}) : super(key: key);
+  FavourWidget(this.basicInfo, this.collectionStatus, this.loading, {Key key})
+      : super(key: key);
 
-  final int id;
-  final Map<String, int> collection;
+  final Map<String, dynamic> basicInfo,
+      collectionStatus; //自己的收藏状态, {}表示未收藏, null表示请求失败
+  final bool loading;
   @override
   _FavourWidgetState createState() => _FavourWidgetState();
 }
 
 class _FavourWidgetState extends State<FavourWidget> {
-  Map<String, int> collection; //大家的收藏状态
-  Map<String, dynamic> collectionStatus = {}; //自己的收藏状态
+  Map<String, int> collection;
+  Map<String, dynamic> collectionStatus;
   bool _loading = true;
-  int rating = 0;
   Map<String, String> type = {
     'wish': '想看',
     'collect': '看过',
@@ -25,41 +26,22 @@ class _FavourWidgetState extends State<FavourWidget> {
     'dropped': '抛弃'
   };
 
-  Future<void> getCollectionStatus() async {
-    // try {
-    //   response = await dio.get('/collection/${widget.id}');
-    //   //未收藏时仍会正常响应
-    //   if (response.data['error'] == null) {
-    //   rating = response.data['rating'];
-    //     setState(() {
-    //       collectionStatus = response.data;
-    //       _loading = true;
-    //     });
-    //   }
-    // } catch (e) {}
-    Future.delayed(Duration(seconds: 3), () {
-      setState(() {
-        collectionStatus = Data().collectionStatus;
-        _loading = false;
-      });
-    });
-  }
-
   @override
   void initState() {
     super.initState();
-    collection = null != widget.collection ? widget.collection : {};
-    if (myDio.isLogIn) {
-      getCollectionStatus();
-    }
+    collection = null != widget.basicInfo['collection']
+        ? widget.basicInfo['collection']
+        : {};
+    collectionStatus = widget.collectionStatus;
+    _loading = widget.loading;
   }
 
   Widget _buttonChild() {
-    if (_loading) {
-      return Text('获取收藏状态中');
-    }
-
     if (myDio.isLogIn) {
+      if (_loading) {
+        return Text('获取收藏状态中');
+      }
+
       if (collectionStatus.isNotEmpty) {
         int _rating = collectionStatus['rating'];
         List<Widget> _rowChildren = []
@@ -106,31 +88,23 @@ class _FavourWidgetState extends State<FavourWidget> {
             "https://bgm.tv/oauth/authorize?client_id=${GlobalVar.appId}&response_type=code",
         title: "登录&授权",
       );
-    }));
+    })).then((_) {
+      if (myDio.isLogIn) {
+        setState(() {});
+      }
+    });
   }
 
   void _openManager() {
     showDialog(
         context: context,
         builder: (context) {
-          return Dialog(
-              child: Container(
-            width: 400,
-            height: 550,
-            child: Column(children: <Widget>[
-              //评分
-              Container(
-                width: 250,
-                decoration: BoxDecoration(border: Border.all()),
-                child: RatingStar(rating, changeRating),
-              ),
-            ]),
-          ));
+          return MyDialog(widget.basicInfo, widget.collectionStatus);
         });
-  }
-
-  void changeRating(int i) {
-    rating = i;
+    // TODO: 成功更新收藏的话则更新详细页的按钮
+    // .then((v) {
+    //   setState(() {});
+    // })
   }
 
   @override
@@ -169,9 +143,70 @@ class _FavourWidgetState extends State<FavourWidget> {
   }
 }
 
+class MyDialog extends StatefulWidget {
+  MyDialog(this.basicInfo, this.collectionStatus, {Key key}) : super(key: key);
+
+  final Map<String, dynamic> basicInfo,
+      collectionStatus; //自己的收藏状态, {}表示未收藏, null表示请求失败
+  @override
+  _MyDialogState createState() => _MyDialogState();
+}
+
+class _MyDialogState extends State<MyDialog> {
+  int rating = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    rating = widget.collectionStatus['rating'];
+  }
+
+  void changeRating(int i) {
+    setState(() {
+      rating = i;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+        child: Container(
+      width: 400,
+      height: 550,
+      child: Column(children: <Widget>[
+        //标题
+        Text(widget.basicInfo['name_cn'] != ''
+            ? widget.basicInfo['name_cn']
+            : widget.basicInfo['name']),
+        Text(widget.basicInfo['name']),
+        //评分
+        rating != 0
+            ? RichText(
+                maxLines: 1,
+                text: TextSpan(children: [
+                  TextSpan(
+                      text: GlobalVar().getRating(rating),
+                      style: TextStyle(color: Colors.amber[400])),
+                  TextSpan(
+                      text: '清除',
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () => changeRating(0),
+                      style: TextStyle(color: Colors.black45))
+                ]),
+              )
+            : Text(''),
+        Container(
+          width: 250,
+          child: RatingStar(rating, changeRating),
+        ),
+      ]),
+    ));
+  }
+}
+
 class RatingStar extends StatefulWidget {
   final int rating;
-  final void changeRating;
+  final changeRating;
 
   RatingStar(this.rating, this.changeRating, {Key key}) : super(key: key);
   @override
@@ -180,32 +215,31 @@ class RatingStar extends StatefulWidget {
 
 class _RatingStarState extends State<RatingStar> {
   var rating; //max:10
-  List<int> status = List(5); //0:未选中 1:半星 2:一颗星
+  ///0:未选中 1:半星 2:一颗星
+  List<int> status = List(5);
 
   @override
   void initState() {
     super.initState();
-    setRating(widget.rating);
+    rating = widget.rating;
   }
 
   void setRating(int v) {
     rating = v;
-    for (var _i = 0; _i < v / 2; _i++) {
-      status[_i] = 2;
-    }
-    if (v % 2 == 1) {
-      status[(v / 2).floor()] = 1;
-    }
-    for (var _i = (v / 2).ceil(); _i < 5; _i++) {
-      status[_i] = 0;
-    }
-    setState(() {});
+    widget.changeRating(v);
   }
 
   List<Widget> starList() {
     List<Widget> _temp = [];
-    for (var _i = 0; _i < status.length; _i++) {
-      _temp.add(star(status[_i], _i));
+    var r = widget.rating;
+    for (var _i = 0; _i <= (r / 2) - 1; _i++) {
+      _temp.add(star(2, _i));
+    }
+    if (r % 2 == 1) {
+      _temp.add(star(1, (r / 2).floor()));
+    }
+    for (var _i = (r / 2).ceil(); _i < 5; _i++) {
+      _temp.add(star(0, _i));
     }
     return _temp;
   }

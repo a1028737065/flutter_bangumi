@@ -32,7 +32,7 @@ class _FavorItemState extends State<FavorItem>
           'https://cdn.jsdelivr.net/gh/czy0729/Bangumi-Subject@master/data/${(widget.id / 100).floor()}/${widget.id}.json');
       data2 = response.data;
       response = await dio.get('/collection/${widget.id}');
-      if (response.data['code'] != 400) {
+      if (response.data['code'] == null) {
         data3 = response.data;
         showMap['rating'] = data3['rating'];
 
