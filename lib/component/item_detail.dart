@@ -340,7 +340,7 @@ class _ItemDetailState extends State<ItemDetail> {
                                         child: Padding(
                                       padding: EdgeInsets.only(top: 3),
                                       child: Text(
-                                        null != data1['name_cn']
+                                        '' != data1['name_cn']
                                             ? data1['name_cn']
                                             : data1['name'],
                                         style: TextStyle(
@@ -352,7 +352,8 @@ class _ItemDetailState extends State<ItemDetail> {
                                     Padding(
                                       padding: EdgeInsets.only(bottom: 15),
                                       child: Row(children: [
-                                        Text('${data1['rating']['score']}',
+                                        Text(
+                                            '${data1['rating']['score'].toStringAsFixed(1)}',
                                             style: TextStyle(
                                                 color: Colors.pink[300],
                                                 fontSize: 18)),

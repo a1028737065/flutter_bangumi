@@ -8,7 +8,7 @@ class SearchItem extends StatelessWidget {
   final double width;
 
   String _type() {
-    return ['三次元', '动画', '音乐', '游戏', '', '三次元'][data['type'] - 1];
+    return ['书籍', '动画', '音乐', '游戏', '', '三次元'][data['type'] - 1];
   }
 
   String _description() {
