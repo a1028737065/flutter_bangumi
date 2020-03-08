@@ -55,24 +55,21 @@ class SearchItem extends StatelessWidget {
           },
           child: Row(children: <Widget>[
             Container(
-              margin: EdgeInsets.only(left: 15, right: 15),
               width: 92,
-              decoration: BoxDecoration(boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  offset: Offset(0, 2),
-                  blurRadius: 8,
-                ),
-              ]),
+              margin: EdgeInsets.only(left: 15, right: 15),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(3),
-                child: ExtendedImage.network('${data['images']['large']}',
-                    loadStateChanged: (ExtendedImageState state) {
-                  if (state.extendedImageLoadState == LoadState.loading) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  return null;
-                }),
+                child: data['images'] != null
+                    ? ExtendedImage.network('${data['images']['large']}',
+                        loadStateChanged: (ExtendedImageState state) {
+                        if (state.extendedImageLoadState == LoadState.loading) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+                        return null;
+                      })
+                    : Center(
+                        child: Text('暂无图片'),
+                      ),
               ),
             ),
             Flex(

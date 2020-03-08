@@ -25,8 +25,11 @@ class _FavoritePageState extends State<FavoritePage> {
             child: CircularProgressIndicator(),
           )
         : Container(
-            //TODO: 登出按钮
-            child: myDio.isLogIn ? FavourManage() : Text('您还没有登录哦'));
+            child: myDio.isLogIn
+                ? FavourManage()
+                : Center(
+                    child: Text('您还没有登录哦，请点击右上角的小人来登录'),
+                  ));
   }
 }
 

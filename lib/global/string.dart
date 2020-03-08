@@ -3,8 +3,16 @@ class GlobalVar {
   static final String appSecret = '';
   static final String apiUrl = 'https://api.bgm.tv';
   static final String redirectUrl = 'https://book.yuan2323.xyz';
+  
+  static final Map<String, String> collectionStatusType2CN = {
+    'wish': '想看',
+    'collect': '看过',
+    'doing': '在看',
+    'on_hold': '搁置',
+    'dropped': '抛弃'
+  };
 
-  String getRating(double score) {
+  String getRating(int score) {
     if (score >= 9.5) return '超神作';
     if (score >= 8.5) return '神作';
     if (score >= 7.5) return '力荐';

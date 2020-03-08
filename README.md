@@ -6,10 +6,11 @@
 - 查看收藏
 - 查看每日放送
 - 搜索
-- 查看条目详情
+- 查看条目详情（部分）
+- 更新收藏状态（评分、标签、吐槽）
 
 ### 未实现
-- 更新收藏状态（评分、标签、吐槽）
+- 查看条目详情（staff、条目相关信息、吐槽）
 
 ## 测试
 1. 安装Flutter。
@@ -18,5 +19,6 @@
 4. 在根目录执行 `flutter run` 或 执行 `flutter build apk` 打包为apk文件。
 
 ## 使用到的其他开发者的项目
-1. bangumi[官方Api](https://github.com/bangumi/api)
-2. [Bangumi-Subject](https://github.com/czy0729/Bangumi-Subject) By [czy0729](https://github.com/czy0729)，提供了热门条目静态数据。
+1. [flutter](https://github.com/flutter/flutter)
+2. bangumi[官方Api](https://github.com/bangumi/api)
+3. [Bangumi-Subject](https://github.com/czy0729/Bangumi-Subject) By [czy0729](https://github.com/czy0729)，提供了热门条目静态数据。

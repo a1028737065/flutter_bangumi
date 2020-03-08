@@ -5,7 +5,6 @@ import 'favor.dart';
 import 'calendar.dart';
 import 'package:bgm/global/dio3.dart';
 import 'package:bot_toast/bot_toast.dart';
-import 'package:bgm/component/item_detail new.dart';
 
 void main() {
   runApp(MyApp());
@@ -65,15 +64,6 @@ class _MainPageState extends State<MainPage>
       appBar: AppBar(
         title: Text('bangumi'),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.insert_drive_file),
-            onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return ItemDetail(222222);
-              }));
-            },
-            tooltip: '搜索',
-          ),
           IconButton(
             icon: Icon(Icons.search),
             onPressed: () {
@@ -194,7 +184,7 @@ class Browser extends StatelessWidget {
         navigationDelegate: (NavigationRequest request) async {
           if (request.url.startsWith(GlobalVar.redirectUrl)) {
             BotToast.showText(
-              text: '需要一点时间进行授权，请稍后',
+              text: '需要一点时间进行授权，请稍候',
               crossPage: false,
               duration: Duration(seconds: 5),
             );

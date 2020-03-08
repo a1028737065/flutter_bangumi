@@ -189,7 +189,7 @@ class _SearchPageState extends State<SearchPage>
                           width: width - 190,
                           child: TextField(
                             controller: controller,
-                            style: TextStyle(height: 1.2),
+                            style: TextStyle(height: 1.4),
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                   borderSide: BorderSide(color: Colors.blue),
@@ -197,7 +197,7 @@ class _SearchPageState extends State<SearchPage>
                                       topRight: Radius.circular(36),
                                       bottomRight: Radius.circular(36))),
                               contentPadding:
-                                  EdgeInsets.only(left: 8, right: 12), //保持垂直居中
+                                  EdgeInsets.fromLTRB(8, 0, 12, 0), //保持垂直居中
                               hintText: 'Text to search',
                             ),
                             maxLines: 1,

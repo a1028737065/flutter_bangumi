@@ -7,6 +7,7 @@ import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'string.dart';
+export 'package:dio/dio.dart';
 export 'string.dart';
 
 Dio dio = Dio();
