@@ -1,6 +1,6 @@
 # bangumi客户端
 
-使用Flutter制作的第三方bangumi客户端。
+使用Flutter制作的第三方 [bangumi](https://bgm.tv) 客户端。
 
 ## 功能
 - 查看收藏
@@ -11,6 +11,10 @@
 
 ### 未实现
 - 查看条目详情（staff、条目相关信息、吐槽）
+- 查看人物信息
+
+## 预览
+[![](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200308-170127-169x300.png)](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200308-170127.png) [![](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200308-170137-169x300.png)](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200308-170137.png)[![](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200309-153723-169x300.png)](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200309-153723.png) [![](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200308-170336-169x300.png)](https://yuan2323.xyz/wp-content/uploads/2020/03/Screenshot_20200308-170336.png)
 
 ## 测试
 1. 安装Flutter。
